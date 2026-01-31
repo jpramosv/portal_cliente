@@ -174,29 +174,32 @@ export default function MessageInput({ conversationId }) {
     }
 
     return (
-        <div className="p-4 bg-white border-t border-gray-100">
-            {/* Recording indicator */}
+        <div className="p-4 bg-white border-t border-gray-100 relative">
+            {/* Recording Polished Overlay */}
             {isRecording && (
-                <div className="mb-3 flex items-center justify-between bg-red-50 border border-red-200 rounded-lg p-3">
-                    <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-                        <span className="text-sm font-medium text-red-700">Gravando áudio...</span>
-                        <span className="text-sm text-red-600">{formatTime(recordingTime)}</span>
+                <div className="absolute inset-x-4 inset-y-2 bg-red-50/95 backdrop-blur-sm z-10 rounded-xl flex items-center justify-between px-4 border border-red-100 shadow-sm animate-fade-in">
+                    <div className="flex items-center gap-3">
+                        <div className="relative">
+                            <div className="w-3 h-3 bg-red-500 rounded-full animate-ping absolute opacity-75"></div>
+                            <div className="w-3 h-3 bg-red-500 rounded-full relative"></div>
+                        </div>
+                        <span className="text-sm font-semibold text-red-700">Gravando...</span>
+                        <span className="text-sm font-mono text-red-600 w-12">{formatTime(recordingTime)}</span>
                     </div>
                     <div className="flex gap-2">
                         <button
                             onClick={cancelRecording}
-                            className="text-red-600 hover:text-red-700 p-1"
+                            className="p-2 text-red-600 hover:bg-red-100 rounded-full transition-colors"
                             title="Cancelar"
                         >
-                            <X size={20} />
+                            <X size={18} />
                         </button>
                         <button
                             onClick={stopRecording}
-                            className="bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700 flex items-center gap-1"
+                            className="bg-red-600 text-white px-4 py-1.5 rounded-full hover:bg-red-700 flex items-center gap-2 shadow-sm transition-all hover:shadow-md"
                         >
-                            <StopCircle size={16} />
-                            Enviar
+                            <Send size={16} />
+                            <span className="text-xs font-bold uppercase tracking-wide">Enviar</span>
                         </button>
                     </div>
                 </div>
@@ -204,42 +207,46 @@ export default function MessageInput({ conversationId }) {
 
             {/* Selected file preview */}
             {selectedFile && (
-                <div className="mb-3 flex items-center justify-between bg-indigo-50 border border-indigo-200 rounded-lg p-3">
-                    <div className="flex items-center gap-2 flex-1 min-w-0">
-                        <Paperclip size={16} className="text-indigo-600 flex-shrink-0" />
-                        <span className="text-sm text-indigo-700 truncate">{selectedFile.name}</span>
-                        <span className="text-xs text-indigo-500 flex-shrink-0">
-                            ({(selectedFile.size / 1024).toFixed(1)} KB)
-                        </span>
+                <div className="mb-3 flex items-center justify-between bg-indigo-50 border border-indigo-100 rounded-lg p-3 animate-fade-in">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-600">
+                            <Paperclip size={16} />
+                        </div>
+                        <div className="flex flex-col">
+                            <span className="text-sm font-medium text-indigo-900 truncate max-w-[200px]">{selectedFile.name}</span>
+                            <span className="text-[10px] text-indigo-500 font-mono">
+                                {(selectedFile.size / 1024).toFixed(1)} KB
+                            </span>
+                        </div>
                     </div>
                     <button
                         onClick={removeSelectedFile}
-                        className="text-indigo-600 hover:text-indigo-700 p-1 flex-shrink-0"
+                        className="text-indigo-400 hover:text-indigo-600 p-1.5 hover:bg-indigo-100 rounded-full transition-colors"
                         title="Remover arquivo"
                     >
-                        <X size={20} />
+                        <X size={16} />
                     </button>
                 </div>
             )}
 
             {/* Emoji picker */}
             {showEmojiPicker && (
-                <div className="mb-3 bg-gray-50 border border-gray-200 rounded-lg p-3">
-                    <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-medium text-gray-600">Emojis comuns</span>
+                <div className="absolute bottom-full left-4 mb-2 bg-white border border-gray-100 rounded-xl shadow-xl p-3 w-72 animate-fade-in z-20">
+                    <div className="flex items-center justify-between mb-2 pb-2 border-b border-gray-50">
+                        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Reações Rápidas</span>
                         <button
                             onClick={() => setShowEmojiPicker(false)}
-                            className="text-gray-400 hover:text-gray-600"
+                            className="text-gray-300 hover:text-gray-500"
                         >
-                            <X size={16} />
+                            <X size={14} />
                         </button>
                     </div>
-                    <div className="grid grid-cols-8 gap-2">
+                    <div className="grid grid-cols-8 gap-1.5">
                         {commonEmojis.map((emoji, idx) => (
                             <button
                                 key={idx}
                                 onClick={() => insertEmoji(emoji)}
-                                className="text-2xl hover:bg-gray-200 rounded p-1 transition-colors"
+                                className="text-xl hover:bg-indigo-50 rounded p-1 transition-transform hover:scale-110"
                             >
                                 {emoji}
                             </button>
@@ -248,15 +255,15 @@ export default function MessageInput({ conversationId }) {
                 </div>
             )}
 
-            <form onSubmit={handleSubmit} className="flex gap-2">
-                <div className="flex gap-1">
+            <form onSubmit={handleSubmit} className="flex gap-3 items-end">
+                <div className="flex gap-1 bg-gray-50 p-1 rounded-xl border border-gray-100">
                     {/* Emoji button */}
                     <button
                         type="button"
                         onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                        className={`p-2 rounded-lg transition-colors ${showEmojiPicker
-                                ? 'bg-indigo-100 text-indigo-600'
-                                : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600'
+                        className={`p-2 rounded-lg transition-all active:scale-95 ${showEmojiPicker
+                            ? 'bg-white text-indigo-600 shadow-sm'
+                            : 'text-gray-400 hover:bg-white hover:text-gray-600 hover:shadow-sm'
                             }`}
                         title="Emojis"
                     >
@@ -267,9 +274,9 @@ export default function MessageInput({ conversationId }) {
                     <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
-                        className={`p-2 rounded-lg transition-colors ${selectedFile
-                                ? 'bg-indigo-100 text-indigo-600'
-                                : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600'
+                        className={`p-2 rounded-lg transition-all active:scale-95 ${selectedFile
+                            ? 'bg-white text-indigo-600 shadow-sm'
+                            : 'text-gray-400 hover:bg-white hover:text-gray-600 hover:shadow-sm'
                             }`}
                         title="Anexar arquivo"
                         disabled={isRecording}
@@ -287,38 +294,37 @@ export default function MessageInput({ conversationId }) {
                     {/* Audio recording button */}
                     <button
                         type="button"
-                        onClick={isRecording ? stopRecording : startRecording}
-                        className={`p-2 rounded-lg transition-colors ${isRecording
-                                ? 'bg-red-100 text-red-600'
-                                : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600'
-                            }`}
-                        title={isRecording ? "Parar gravação" : "Gravar áudio"}
-                        disabled={sending}
+                        onClick={startRecording}
+                        className={`p-2 rounded-lg transition-all active:scale-95 hover:bg-red-50 text-gray-400 hover:text-red-500`}
+                        title="Gravar áudio"
+                        disabled={sending || isRecording}
                     >
                         <Mic size={20} />
                     </button>
                 </div>
 
-                <textarea
-                    ref={textareaRef}
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                            e.preventDefault()
-                            handleSubmit(e)
-                        }
-                    }}
-                    placeholder="Digite sua resposta..."
-                    className="flex-1 border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 border resize-none"
-                    rows={1}
-                    disabled={isRecording}
-                />
+                <div className="flex-1 relative">
+                    <textarea
+                        ref={textareaRef}
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault()
+                                handleSubmit(e)
+                            }
+                        }}
+                        placeholder="Digite sua mensagem..."
+                        className="w-full bg-gray-50 border-gray-100 rounded-xl shadow-inner focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 p-3 min-h-[46px] max-h-32 resize-none transition-all placeholder:text-gray-400 text-sm"
+                        rows={1}
+                        disabled={isRecording}
+                    />
+                </div>
 
                 <button
                     type="submit"
                     disabled={sending || (!message.trim() && !selectedFile) || isRecording}
-                    className="bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors self-end"
+                    className="bg-indigo-600 text-white p-3 rounded-xl hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-indigo-200 active:scale-95 flex-shrink-0"
                 >
                     {sending ? <Loader2 className="animate-spin" size={20} /> : <Send size={20} />}
                 </button>

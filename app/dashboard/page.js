@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { getDashboardMetrics } from '@/app/actions/chatwoot'
+import Image from 'next/image'
 import { Users, MessageSquare, Clock, CheckCircle } from 'lucide-react'
 
 export default async function DashboardPage() {
@@ -63,9 +64,15 @@ export default async function DashboardPage() {
                         {metrics.recentConversations.map((conv) => (
                             <div key={conv.id} className="px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
                                 <div className="flex items-center space-x-4">
-                                    <div className="flex-shrink-0">
+                                    <div className="flex-shrink-0 relative h-10 w-10">
                                         {conv.contact.thumbnail ? (
-                                            <img src={conv.contact.thumbnail} alt="" className="h-10 w-10 rounded-full object-cover" />
+                                            <Image
+                                                src={conv.contact.thumbnail}
+                                                alt=""
+                                                fill
+                                                className="rounded-full object-cover"
+                                                sizes="40px"
+                                            />
                                         ) : (
                                             <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
                                                 <Users size={20} />

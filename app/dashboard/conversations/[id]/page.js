@@ -58,14 +58,15 @@ export default function ConversationDetail({ params }) {
                     const isOutgoing = msg.message_type === 1
 
                     return (
-                        <div key={msg.id} className="flex justify-start">
-                            <div className={`max-w-[60%] rounded-2xl px-4 py-3 shadow-sm ${isOutgoing
-                                ? 'bg-indigo-600 text-white rounded-bl-none'
-                                : 'bg-white text-gray-800 border border-gray-100 rounded-bl-none'
+                        <div key={msg.id} className={`flex w-full mb-4 ${isOutgoing ? 'justify-end' : 'justify-start'}`}>
+                            <div className={`max-w-[70%] px-5 py-3.5 shadow-sm relative group ${isOutgoing
+                                ? 'bg-indigo-600 text-white rounded-2xl rounded-tr-sm shadow-indigo-200/50'
+                                : 'bg-white text-gray-800 border border-gray-100 rounded-2xl rounded-tl-sm shadow-sm'
                                 }`}>
                                 <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>
-                                <div className={`text-[10px] mt-1 text-right ${isOutgoing ? 'text-indigo-200' : 'text-gray-400'}`}>
+                                <div className={`text-[10px] mt-1.5 flex items-center gap-1 ${isOutgoing ? 'justify-end text-indigo-100/80' : 'text-gray-400'}`}>
                                     {new Date(msg.created_at * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    {isOutgoing && <span className="opacity-0 group-hover:opacity-100 transition-opacity">✓</span>}
                                 </div>
                             </div>
                         </div>

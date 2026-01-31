@@ -3,11 +3,11 @@
 
 :root {
   /* Premium SaaS Color Palette - Linear/Notion Inspired */
-  --primary-50: #f5f5ff;
-  --primary-100: #e0e0fc;
-  --primary-200: #c7c7f9;
-  --primary-300: #a5a5f5;
-  --primary-400: #8282f0;
+  --primary-50: #eef2ff;
+  --primary-100: #e0e7ff;
+  --primary-200: #c7d2fe;
+  --primary-300: #a5b4fc;
+  --primary-400: #818cf8;
   --primary-500: #6366f1;
   /* Indigo-500 */
   --primary-600: #4f46e5;
@@ -19,33 +19,40 @@
   /* Violet */
   --accent-600: #7c3aed;
 
-  /* Status Colors */
+  /* Status Colors (Refined) */
   --status-success: #10b981;
+  --status-success-bg: #d1fae5;
   --status-warning: #f59e0b;
+  --status-warning-bg: #fef3c7;
   --status-error: #ef4444;
+  --status-error-bg: #fee2e2;
   --status-info: #3b82f6;
+  --status-info-bg: #dbeafe;
 
   /* Backgrounds - Ultra Minimal */
-  --background: #F7F8FA;
-  /* Very light gray for main canvas */
+  --background: #F9FAFB;
+  /* Slightly warmer gray */
   --surface: #ffffff;
-  --surface-hover: #fcfcfd;
+  --surface-hover: #f9fafb;
+  --surface-active: #f3f4f6;
 
   /* Text */
   --text-primary: #111827;
-  --text-secondary: #6B7280;
+  /* Gray-900 */
+  --text-secondary: #4B5563;
+  /* Gray-600 */
   --text-tertiary: #9CA3AF;
+  /* Gray-400 */
 
-  /* Shadows - Soft & Diffused */
-  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
-  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.03);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.03);
-  --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
-  /* Float effect */
+  /* Shadows - Soft, Diffused, & Tinted */
+  --shadow-xs: 0 1px 2px 0 rgba(79, 70, 229, 0.04);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.02);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.02);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.04), 0 4px 6px -4px rgba(0, 0, 0, 0.02);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.04), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
 
-  /* Glassmorphism subtle */
-  --glass-bg: rgba(255, 255, 255, 0.85);
+  /* Glassmorphism - Clearer */
+  --glass-bg: rgba(255, 255, 255, 0.7);
   --glass-border: rgba(255, 255, 255, 0.5);
 }
 

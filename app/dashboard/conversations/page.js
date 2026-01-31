@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { getAllConversations, getInboxes } from '@/app/actions/chatwoot'
 import Link from 'next/link'
+import Image from 'next/image'
 import { MessageSquare, Clock, Search, Filter, Sparkles, MoreHorizontal, Calendar, CheckCircle, AlertCircle, PlayCircle, User } from 'lucide-react'
 
 // Mock AI summary generator (since backend might not have it yet)
@@ -169,7 +170,15 @@ export default async function ConversationsPage({ searchParams }) {
                             <div className="flex justify-between items-start mb-4">
                                 <div className="flex items-center gap-3">
                                     {conv.contact.thumbnail ? (
-                                        <img src={conv.contact.thumbnail} alt={conv.contact.name} className="h-10 w-10 rounded-full object-cover ring-2 ring-white shadow-sm" />
+                                        <div className="relative h-10 w-10 rounded-full overflow-hidden ring-2 ring-white shadow-sm">
+                                            <Image
+                                                src={conv.contact.thumbnail}
+                                                alt={conv.contact.name}
+                                                fill
+                                                className="object-cover"
+                                                sizes="40px"
+                                            />
+                                        </div>
                                     ) : (
                                         <div className="h-10 w-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 font-semibold text-sm ring-2 ring-white shadow-sm">
                                             {conv.contact.name?.[0] || <User size={16} />}

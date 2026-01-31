@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { Search, Filter, Sparkles, MoreHorizontal, Clock, CheckCircle, AlertCircle, PlayCircle, User } from 'lucide-react'
 import { useState } from 'react'
@@ -24,22 +25,30 @@ const ConversationItem = ({ conv, isActive }) => {
     return (
         <Link
             href={`/dashboard/conversations/${conv.id}`}
-            className={`group flex items-start gap-3 p-3 rounded-xl transition-all duration-200 border border-transparent ${isActive
-                    ? 'bg-white shadow-md border-indigo-50/50 relative z-10'
-                    : 'hover:bg-white/60 hover:shadow-sm'
+            className={`group flex items-start gap-3 p-3 rounded-xl transition-all duration-200 border ${isActive
+                ? 'bg-white shadow-md border-indigo-100/50 ring-1 ring-indigo-500/10 relative z-10'
+                : 'border-transparent hover:bg-white/60 hover:shadow-sm'
                 }`}
         >
             <div className="relative flex-shrink-0 mt-1">
                 {conv.contact.thumbnail ? (
-                    <img src={conv.contact.thumbnail} alt="" className="w-10 h-10 rounded-full object-cover ring-2 ring-white" />
+                    <div className="relative w-10 h-10 rounded-full overflow-hidden ring-2 ring-white shadow-sm">
+                        <Image
+                            src={conv.contact.thumbnail}
+                            alt={conv.contact.name || 'Contact'}
+                            fill
+                            className="object-cover"
+                            sizes="40px"
+                        />
+                    </div>
                 ) : (
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-sm ${isActive ? 'bg-indigo-600' : 'bg-gray-400'
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-sm ring-2 ring-white shadow-sm ${isActive ? 'bg-gradient-to-br from-indigo-500 to-indigo-600' : 'bg-gradient-to-br from-gray-400 to-gray-500'
                         }`}>
                         {conv.contact.name?.[0] || 'U'}
                     </div>
                 )}
                 {conv.status === 'open' && (
-                    <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
+                    <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full shadow-sm z-10"></span>
                 )}
             </div>
 
@@ -60,8 +69,8 @@ const ConversationItem = ({ conv, isActive }) => {
 
                 <div className="flex items-center gap-2">
                     <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium border ${conv.status === 'open' ? 'bg-green-50 text-green-700 border-green-100' :
-                            conv.labels?.includes('urgente') ? 'bg-red-50 text-red-700 border-red-100' :
-                                'bg-gray-50 text-gray-600 border-gray-100'
+                        conv.labels?.includes('urgente') ? 'bg-red-50 text-red-700 border-red-100' :
+                            'bg-gray-50 text-gray-600 border-gray-100'
                         }`}>
                         {conv.status === 'open' ? 'Aberto' : conv.status}
                     </span>
@@ -84,9 +93,9 @@ export default function Sidebar({ initialConversations, inboxes }) {
     )
 
     return (
-        <aside className="w-80 border-r border-gray-200 bg-[#F7F8FA] flex flex-col h-full">
+        <aside className="w-80 border-r border-gray-200 bg-[#F9FAFB] flex flex-col h-full">
             {/* Header */}
-            <div className="p-4 border-b border-gray-200/60 bg-[#F7F8FA]/80 backdrop-blur-sm sticky top-0 z-20">
+            <div className="p-4 border-b border-gray-200/50 bg-[#F9FAFB]/80 backdrop-blur-xl sticky top-0 z-20">
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="text-lg font-bold text-gray-900 tracking-tight">Inbox</h2>
                     <div className="flex gap-1">
