@@ -1,116 +1,220 @@
 import { createClient } from '@/utils/supabase/server'
-import { getDashboardMetrics } from '@/app/actions/chatwoot'
-import Image from 'next/image'
-import { Users, MessageSquare, Clock, CheckCircle } from 'lucide-react'
+import {
+    getOperationalMetrics,
+    getPatientMetrics,
+    getAIPerformanceMetrics,
+    getDistributionMetrics
+} from '@/app/actions/dashboard'
+import MetricCardWithTrend from './components/MetricCardWithTrend'
+import HorizontalBarChart from './components/HorizontalBarChart'
+import {
+    Calendar,
+    CheckCircle,
+    Clock,
+    XCircle,
+    Users,
+    RotateCcw,
+    Activity,
+    Bot,
+    AlertTriangle,
+    Zap,
+    UserX
+} from 'lucide-react'
 
 export default async function DashboardPage() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
-    // Fetch metrics
-    const metrics = await getDashboardMetrics()
+    // Fetch all metrics in parallel
+    const [operationalMetrics, patientMetrics, aiMetrics, distributionMetrics] = await Promise.all([
+        getOperationalMetrics(),
+        getPatientMetrics(),
+        getAIPerformanceMetrics(),
+        getDistributionMetrics()
+    ])
 
     return (
-        <div className="space-y-8">
-            <div className="flex justify-between items-end">
+        <div className="space-y-10 max-w-7xl p-6">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-8">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Olá, {user?.email}</h1>
-                    <p className="text-gray-500 mt-1">Bem-vindo ao painel da sua clínica.</p>
-                </div>
-                <div className="flex items-center space-x-2 text-sm text-green-600 bg-green-50 px-3 py-1 rounded-full border border-green-200">
-                    <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                    </span>
-                    <span className="font-medium">Sistema Online</span>
-                </div>
-            </div>
-
-            {/* Metrics Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <MetricCard
-                    title="Total de Contatos"
-                    value={metrics.totalContacts}
-                    icon={<Users className="text-indigo-600" size={24} />}
-                    color="bg-indigo-50"
-                />
-                <MetricCard
-                    title="Conversas Totais"
-                    value={metrics.totalConversations}
-                    icon={<MessageSquare className="text-blue-600" size={24} />}
-                    color="bg-blue-50"
-                />
-                <MetricCard
-                    title="Em Aberto"
-                    value={metrics.openConversations}
-                    icon={<Clock className="text-orange-600" size={24} />}
-                    color="bg-orange-50"
-                />
-                <MetricCard
-                    title="Finalizados"
-                    value={metrics.closedConversations}
-                    icon={<CheckCircle className="text-green-600" size={24} />}
-                    color="bg-green-50"
-                />
-            </div>
-
-            {/* Recent Activity */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-100">
-                    <h3 className="text-lg font-semibold text-gray-900">Atividade Recente</h3>
-                </div>
-                {metrics.recentConversations?.length > 0 ? (
-                    <div className="divide-y divide-gray-100">
-                        {metrics.recentConversations.map((conv) => (
-                            <div key={conv.id} className="px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
-                                <div className="flex items-center space-x-4">
-                                    <div className="flex-shrink-0 relative h-10 w-10">
-                                        {conv.contact.thumbnail ? (
-                                            <Image
-                                                src={conv.contact.thumbnail}
-                                                alt=""
-                                                fill
-                                                className="rounded-full object-cover"
-                                                sizes="40px"
-                                            />
-                                        ) : (
-                                            <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
-                                                <Users size={20} />
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div>
-                                        <p className="text-sm font-medium text-gray-900">{conv.contact.name || 'Desconhecido'}</p>
-                                        <p className="text-xs text-gray-500 line-clamp-1">{conv.last_message}</p>
-                                    </div>
-                                </div>
-                                <span className="text-xs text-gray-400">
-                                    {new Date(conv.last_activity_at * 1000).toLocaleDateString()}
-                                </span>
-                            </div>
-                        ))}
+                    <div className="flex items-center space-x-3">
+                        <div className="text-blue-600">
+                            <Calendar size={32} />
+                        </div>
+                        <h1 className="text-3xl font-bold text-gray-900">Dashboard de Agendamentos</h1>
                     </div>
-                ) : (
-                    <div className="p-8 text-center text-gray-500">
-                        Nenhuma atividade recente.
-                    </div>
-                )}
-            </div>
-        </div>
-    )
-}
+                    <p className="text-sm text-gray-500 mt-2">Métricas e análises em tempo real do sistema de gestão</p>
+                </div>
 
-function MetricCard({ title, value, icon, color }) {
-    return (
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-4">
-                <div className={`p-3 rounded-lg ${color}`}>
-                    {icon}
+                {/* Time Filters */}
+                <div className="flex items-center gap-3">
+                    <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
+                        Hoje
+                    </button>
+                    <button className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                        Esta Semana
+                    </button>
+                    <button className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                        Este Mês
+                    </button>
+                    <button className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                        Trimestre
+                    </button>
                 </div>
             </div>
-            <div>
-                <p className="text-sm font-medium text-gray-500">{title}</p>
-                <h3 className="text-2xl font-bold text-gray-900 mt-1">{value}</h3>
+
+            {/* Métricas Operacionais */}
+            <section className="py-2">
+                <h2 className="text-lg font-semibold text-gray-900 mb-6">Métricas Operacionais</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <MetricCardWithTrend
+                        title="TOTAL DE AGENDAMENTOS"
+                        value={operationalMetrics.total_agendamentos.value}
+                        variation={operationalMetrics.total_agendamentos.variation}
+                        subtitle="vs. período anterior"
+                        icon={<Calendar className="text-blue-600" size={20} />}
+                    />
+                    <MetricCardWithTrend
+                        title="TAXA DE CONFIRMAÇÃO"
+                        value={operationalMetrics.taxa_confirmacao.value}
+                        variation={operationalMetrics.taxa_confirmacao.variation}
+                        subtitle="consultas confirmadas"
+                        icon={<CheckCircle className="text-green-600" size={20} />}
+                        format="percentage"
+                    />
+                    <MetricCardWithTrend
+                        title="TAXA DE OCUPAÇÃO"
+                        value={operationalMetrics.taxa_ocupacao.value}
+                        variation={operationalMetrics.taxa_ocupacao.variation}
+                        subtitle="horários preenchidos"
+                        icon={<Activity className="text-purple-600" size={20} />}
+                        format="percentage"
+                    />
+                    <MetricCardWithTrend
+                        title="TAXA DE CANCELAMENTO"
+                        value={operationalMetrics.taxa_cancelamento.value}
+                        variation={operationalMetrics.taxa_cancelamento.variation}
+                        subtitle="consultas canceladas"
+                        icon={<XCircle className="text-red-600" size={20} />}
+                        format="percentage"
+                    />
+                </div>
+            </section>
+
+            {/* Métricas de Pacientes */}
+            <section className="py-2">
+                <h2 className="text-lg font-semibold text-gray-900 mb-6">Métricas de Pacientes</h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <MetricCardWithTrend
+                        title="NOVOS PACIENTES"
+                        value={patientMetrics.novos_pacientes.value}
+                        variation={patientMetrics.novos_pacientes.variation}
+                        subtitle="primeiras consultas"
+                        icon={<Users className="text-blue-600" size={20} />}
+                    />
+                    <MetricCardWithTrend
+                        title="RETORNOS"
+                        value={patientMetrics.retornos.value}
+                        variation={patientMetrics.retornos.variation}
+                        subtitle="pacientes recorrentes"
+                        icon={<RotateCcw className="text-indigo-600" size={20} />}
+                    />
+                    <MetricCardWithTrend
+                        title="PACIENTES ATIVOS"
+                        value={patientMetrics.pacientes_ativos.value}
+                        subtitle={patientMetrics.pacientes_ativos.subtitle}
+                        icon={<Activity className="text-green-600" size={20} />}
+                    />
+                </div>
+            </section>
+
+            {/* Performance da IA */}
+            <section className="py-2">
+                <h2 className="text-lg font-semibold text-gray-900 mb-6">Performance da IA</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <MetricCardWithTrend
+                        title="ATENDIMENTOS AUTOMATIZADOS"
+                        value={aiMetrics.atendimentos_automatizados.value}
+                        variation={aiMetrics.atendimentos_automatizados.variation}
+                        subtitle="sem escalação humana"
+                        icon={<Bot className="text-blue-600" size={20} />}
+                        format="percentage"
+                    />
+                    <MetricCardWithTrend
+                        title="ESCALAÇÕES HUMANAS"
+                        value={aiMetrics.escalacoes_humanas.value}
+                        variation={aiMetrics.escalacoes_humanas.variation}
+                        subtitle="casos complexos"
+                        icon={<AlertTriangle className="text-orange-600" size={20} />}
+                    />
+                    <MetricCardWithTrend
+                        title="TEMPO MÉDIO DE RESPOSTA"
+                        value={`${aiMetrics.tempo_medio_resposta.value}${aiMetrics.tempo_medio_resposta.unit}`}
+                        subtitle="resposta da IA"
+                        icon={<Zap className="text-yellow-600" size={20} />}
+                    />
+                    <MetricCardWithTrend
+                        title="DESVIOS DR. ELDER"
+                        value={aiMetrics.desvios_dr_elder.value}
+                        subtitle="redirecionamentos"
+                        icon={<UserX className="text-red-600" size={20} />}
+                    />
+                </div>
+            </section>
+
+            {/* Distribuição e Análises */}
+            <section className="py-2">
+                <h2 className="text-lg font-semibold text-gray-900 mb-6">Distribuição e Análises</h2>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Distribuição por Profissional */}
+                    <HorizontalBarChart
+                        title="Distribuição por Profissional"
+                        subtitle="Agendamentos por médico"
+                        data={distributionMetrics.por_profissional.map(p => ({
+                            label: p.nome,
+                            value: p.total
+                        }))}
+                        colorScheme="blue"
+                    />
+
+                    {/* Tipos de Tratamento */}
+                    <HorizontalBarChart
+                        title="Tipos de Tratamento"
+                        subtitle="Procedimentos mais solicitados"
+                        data={distributionMetrics.por_tratamento.map(t => ({
+                            label: t.tipo,
+                            value: t.total
+                        }))}
+                        colorScheme="green"
+                    />
+                </div>
+
+                {/* Principais Motivos de Escalação */}
+                <div className="mt-8">
+                    <HorizontalBarChart
+                        title="Principais Motivos de Escalação"
+                        subtitle="Por que a IA escalou para humano"
+                        data={distributionMetrics.motivos_escalacao.map(m => ({
+                            label: m.motivo,
+                            value: m.total
+                        }))}
+                        colorScheme="orange"
+                    />
+                </div>
+            </section>
+
+            {/* Footer */}
+            <div className="text-center text-xs text-gray-400 pt-8 pb-4">
+                Dashboard de Gestão de Agendamentos © 2026
+                <br />
+                Atualizado em: {new Date().toLocaleString('pt-BR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                })}
             </div>
         </div>
     )

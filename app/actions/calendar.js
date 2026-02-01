@@ -3,12 +3,16 @@
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 
+import { clinicorp } from '@/app/lib/integrations/clinicorp'
+
 export async function getAppointments(start, end) {
     const supabase = await createClient()
 
-    // Default to current month if not provided
+    // Fetch from local mirror
+    // Ideally, we would have a background sync job.
+    // For now, we trust the local DB is updated via create/webhooks.
     let query = supabase
-        .from('crm_appointments')
+        .from('appointments') // Changed to new table
         .select(`
             *,
             patient:cache_pacientes(nome, telefone)
@@ -31,32 +35,61 @@ export async function getAppointments(start, end) {
 export async function createAppointment({ patientId, title, startTime, endTime, notes }) {
     const supabase = await createClient()
 
-    const { data, error } = await supabase
-        .from('crm_appointments')
-        .insert({
+    try {
+        // 1. Create in Clinicorp System (Source of Truth)
+        // We look up patient name if needed, or pass ID. Mock service handles it.
+        const clinicorpAppt = await clinicorp.createAppointment({
             patient_id: patientId,
             title,
             start_time: startTime,
             end_time: endTime,
             notes
         })
-        .select()
-        .single()
 
-    if (error) {
-        console.error('Error creating appointment:', error)
+        if (!clinicorpAppt || !clinicorpAppt.id) {
+            throw new Error('Failed to create appointment in Clinicorp ERP')
+        }
+
+        // 2. Save/Sync to Supabase Mirror
+        const { data, error } = await supabase
+            .from('appointments') // Changed to new table
+            .insert({
+                patient_id: patientId,
+                start_time: startTime,
+                end_time: endTime,
+                notes,
+                status: 'scheduled',
+                metadata: {
+                    title: title,
+                    source_id: clinicorpAppt.external_id || clinicorpAppt.id, // Stored in metadata per user request
+                    synced_at: new Date().toISOString()
+                }
+            })
+            .select()
+            .single()
+
+        if (error) {
+            console.error('Error creating local appointment mirror:', error)
+            // We should probably rollback Clinicorp here or mark as sync-error
+            return { error: 'Created in ERP but failed to save locally: ' + error.message }
+        }
+
+        revalidatePath('/dashboard/agenda')
+        return { success: true, appointment: data }
+
+    } catch (error) {
+        console.error('Integration Error:', error)
         return { error: error.message }
     }
-
-    revalidatePath('/dashboard/agenda')
-    return { success: true, appointment: data }
 }
 
 export async function updateAppointment(id, updates) {
     const supabase = await createClient()
 
+    // NOTE: Should also update Clinicorp here via service
+
     const { error } = await supabase
-        .from('crm_appointments')
+        .from('appointments')
         .update(updates)
         .eq('id', id)
 
@@ -72,8 +105,10 @@ export async function updateAppointment(id, updates) {
 export async function deleteAppointment(id) {
     const supabase = await createClient()
 
+    // NOTE: Should also cancel in Clinicorp here via service
+
     const { error } = await supabase
-        .from('crm_appointments')
+        .from('appointments')
         .delete()
         .eq('id', id)
 
