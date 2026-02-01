@@ -1,18 +1,16 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useRef } from 'react'
 import { sendMessage, sendMessageWithAttachment } from '@/app/actions/chatwoot'
-import { Send, Loader2, Mic, Paperclip, Smile, X, StopCircle } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { Send, Loader2, Mic, Paperclip, Smile, X } from 'lucide-react'
 
-export default function MessageInput({ conversationId }) {
+export default function MessageInput({ conversationId, onMessageSent }) {
     const [message, setMessage] = useState('')
     const [sending, setSending] = useState(false)
     const [showEmojiPicker, setShowEmojiPicker] = useState(false)
     const [isRecording, setIsRecording] = useState(false)
     const [recordingTime, setRecordingTime] = useState(0)
     const [selectedFile, setSelectedFile] = useState(null)
-    const router = useRouter()
 
     const mediaRecorderRef = useRef(null)
     const audioChunksRef = useRef([])
@@ -20,14 +18,8 @@ export default function MessageInput({ conversationId }) {
     const fileInputRef = useRef(null)
     const textareaRef = useRef(null)
 
-    useEffect(() => {
-        // Poll for new messages every 5 seconds
-        const interval = setInterval(() => {
-            router.refresh()
-        }, 5000)
-
-        return () => clearInterval(interval)
-    }, [router])
+    // Polling removed to prevent page refresh flickering
+    // Polling is now handled silently in parent component
 
     // Common emojis for quick access
     const commonEmojis = ['😊', '😂', '❤️', '👍', '🙏', '😢', '😍', '🎉', '👏', '🔥', '✅', '❌', '⚠️', '📅', '📞', '💰']
@@ -112,7 +104,7 @@ export default function MessageInput({ conversationId }) {
             if (error) {
                 alert('Erro ao enviar áudio: ' + error)
             } else {
-                router.refresh()
+                if (onMessageSent) onMessageSent()
             }
         } catch (err) {
             console.error(err)
@@ -157,7 +149,7 @@ export default function MessageInput({ conversationId }) {
                 if (fileInputRef.current) {
                     fileInputRef.current.value = ''
                 }
-                router.refresh()
+                if (onMessageSent) onMessageSent()
             }
         } catch (err) {
             console.error(err)

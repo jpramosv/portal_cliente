@@ -139,6 +139,29 @@ export async function getMessages(conversationId) {
     }
 }
 
+export async function getConversation(conversationId) {
+    if (!BASE_URL || !CHATWOOT_API_ACCESS_TOKEN) return { error: 'Chatwoot env vars missing' }
+
+    try {
+        const response = await fetch(`${BASE_URL}/api/v1/accounts/${CHATWOOT_ACCOUNT_ID}/conversations/${conversationId}`, {
+            headers: {
+                'api_access_token': CHATWOOT_API_ACCESS_TOKEN,
+                'Content-Type': 'application/json'
+            },
+            next: { revalidate: 0 }
+        })
+
+        if (!response.ok) throw new Error('Failed to fetch conversation')
+
+        const data = await response.json()
+        return { conversation: data }
+
+    } catch (error) {
+        console.error('Error getting conversation:', error)
+        return { error: error.message }
+    }
+}
+
 export async function getAllConversations(inboxId = null) {
     if (!BASE_URL || !CHATWOOT_API_ACCESS_TOKEN) return { error: 'Chatwoot env vars missing' }
 
