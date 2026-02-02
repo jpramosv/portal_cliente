@@ -12,15 +12,28 @@ export async function getAppointments(start, end) {
     // Ideally, we would have a background sync job.
     // For now, we trust the local DB is updated via create/webhooks.
     let query = supabase
-        .from('appointments') // Changed to new table
+        .from('appointments')
         .select(`
-            *,
+            id,
+            patient_id,
+            start_time,
+            end_time,
+            status,
+            procedure_type,
+            notes,
+            metadata,
+            id_app_clinicorp,
+            "Deleted",
+            "Canceled",
+            "Procedures",
+            date,
+            dentist_id,
             patient:cache_pacientes(nome, telefone)
         `)
-        .order('start_time', { ascending: true })
+        .order('date', { ascending: true })
 
-    if (start) query = query.gte('start_time', start.toISOString())
-    if (end) query = query.lte('end_time', end.toISOString())
+    if (start) query = query.gte('date', start.toISOString())
+    if (end) query = query.lte('date', end.toISOString())
 
     const { data: appointments, error } = await query
 
@@ -52,16 +65,17 @@ export async function createAppointment({ patientId, title, startTime, endTime, 
 
         // 2. Save/Sync to Supabase Mirror
         const { data, error } = await supabase
-            .from('appointments') // Changed to new table
+            .from('appointments')
             .insert({
                 patient_id: patientId,
                 start_time: startTime,
                 end_time: endTime,
                 notes,
                 status: 'scheduled',
+                id_app_clinicorp: clinicorpAppt.external_id || clinicorpAppt.id,
                 metadata: {
                     title: title,
-                    source_id: clinicorpAppt.external_id || clinicorpAppt.id, // Stored in metadata per user request
+                    source_id: clinicorpAppt.external_id || clinicorpAppt.id,
                     synced_at: new Date().toISOString()
                 }
             })
